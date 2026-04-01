@@ -38,17 +38,32 @@ export default function HomePage() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Mes guides</h1>
-      <GuideFilters onSearchChange={setSearch} />
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mb-8 animate-fade-in-down">
+        <h1 className="text-4xl font-bold text-slate-900 sm:text-5xl">
+          Mes guides
+        </h1>
+        <p className="mt-2 text-slate-600">
+          Retrouvez vos itineraires sous forme de cartes claires et visuelles.
+        </p>
+      </section>
+
+      <div className="animate-fade-in-up delay-100">
+        <GuideFilters onSearchChange={setSearch} />
+      </div>
+
       {filtered.length === 0 ? (
-        <p>Aucun guide ne correspond à votre recherche.</p>
+        <p className="rounded-lg px-4 py-6 text-center text-slate-600 animate-fade-in-up">
+          Aucun guide ne correspond a votre recherche.
+        </p>
       ) : (
-        <div className="grid gap-3">
+        <section className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((guide) => (
-            <GuideCard key={guide.id} guide={guide} />
+            <div key={guide.id} className="animate-fade-in-up">
+              <GuideCard guide={guide} />
+            </div>
           ))}
-        </div>
+        </section>
       )}
     </main>
   );
