@@ -22,7 +22,7 @@ export default function GuideDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
+      <main className="detail-shell flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="inline-flex items-center justify-center w-12 h-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -35,12 +35,12 @@ export default function GuideDetailPage() {
 
   if (isError || !data) {
     return (
-      <main className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center space-y-4">
+      <main className="detail-shell flex items-center justify-center px-4">
+        <div className="state-card state-card--error space-y-4 text-center">
           <p className="text-red-600 font-medium">Impossible de charger ce guide</p>
           <button
             onClick={() => router.push("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="primary-button"
           >
             Retour
           </button>
@@ -50,21 +50,26 @@ export default function GuideDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 overflow-hidden">
+    <main className="detail-shell">
+      <div className="detail-bg-layer">
+        <div className="detail-orb-left" />
+        <div className="detail-orb-right" />
+      </div>
+
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white shadow-sm animate-fade-in-down">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="detail-topbar animate-fade-in-down">
+        <div className="detail-topbar-inner flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 px-4 py-2 text-blue-600 font-medium text-sm md:text-base bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 hover:shadow-md active:scale-95 group"
+            className="back-button group"
           >
             <span className="transform group-hover:-translate-x-0.5 transition-transform">
               ←
             </span>
             <span className="hidden sm:inline">Retour</span>
           </button>
-          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
-            data.isShared ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+          <span className={`visibility-pill ${
+            data.isShared ? 'visibility-pill--shared' : 'visibility-pill--private'
           }`}>
             {data.isShared ? 'Partagé' : 'Privé'}
           </span>
@@ -72,24 +77,24 @@ export default function GuideDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-10">
+      <div className="detail-content space-y-10">
         
         {/* Title and Description */}
-        <section className="space-y-3 animate-fade-in-up">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+        <section className="detail-hero animate-fade-in-up space-y-3">
+          <h1 className="detail-title">
             {data.title}
           </h1>
           {data.description && (
             <p className="text-gray-700 text-lg leading-relaxed">{data.description}</p>
           )}
-          <div className="mt-5 flex items-center gap-6 text-sm text-gray-600">
+          <div className="detail-meta">
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+              <span className="detail-meta-dot"></span>
               {data.days.length} jour{data.days.length > 1 ? 's' : ''}
             </span>
             {data.ownerName && (
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span className="detail-meta-dot"></span>
                 Par {data.ownerName}
               </span>
             )}
@@ -97,11 +102,11 @@ export default function GuideDetailPage() {
         </section>
 
         {/* Days and Activities */}
-        <section className="space-y-7 animate-fade-in-up">
+        <section className="days-list animate-fade-in-up">
           {data.days.map((day, dayIndex) => (
-            <div key={day.id} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition border border-gray-200 animate-fade-in-up">
+            <div key={day.id} className="day-card animate-fade-in-up">
               <div className="flex items-center gap-3 mb-4">
-                <span className="inline-block w-7 h-7 bg-blue-600 text-white text-xs font-bold rounded flex items-center justify-center">
+                <span className="day-index">
                   {dayIndex + 1}
                 </span>
                 <div>
@@ -118,7 +123,7 @@ export default function GuideDetailPage() {
               <div className="space-y-2 mt-4">
                 {day.activities.length > 0 ? (
                   day.activities.map((activity, idx) => (
-                    <div key={activity.id} className="bg-slate-50 p-3 rounded-lg border border-gray-200">
+                    <div key={activity.id} className="activity-card">
                       <div className="flex gap-2">
                         <span className="text-xs font-semibold text-gray-600 mt-0.5">{idx + 1}.</span>
                         <div className="flex-1">
