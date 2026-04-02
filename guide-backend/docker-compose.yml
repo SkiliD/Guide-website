@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: guide-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-guide_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-guide_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - guide-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: guide-backend-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./src:/app/src
+      - ./tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    networks:
+      - guide-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: guide-pgadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@guide.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - guide-network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  guide-network:
+    name: guide-network
+    driver: bridge
