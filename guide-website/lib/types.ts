@@ -14,10 +14,18 @@ export type Day = {
   activities: Activity[];
 };
 
+export type Mobility = 'voiture' | 'velo' | 'a_pied' | 'moto';
+export type Season = 'ete' | 'printemps' | 'automne' | 'hiver';
+export type Audience = 'famille' | 'seul' | 'groupe' | 'entre_amis';
+
 export type Guide = {
   id: string;
   title: string;
   description?: string;
+  mobility: Mobility[];
+  season: Season[];
+  audience: Audience[];
+  daysCount: number;
   days: Day[];
   ownerName?: string;
   isShared?: boolean;

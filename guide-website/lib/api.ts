@@ -1,47 +1,45 @@
 import { Guide } from './types';
+import { getToken, clearAuth } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA !== 'false';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-const mockGuides: Guide[] = [
-  {
-    id: '1',
-    title: 'Voyage a Tokyo',
-    description: 'Une semaine au Japon',
-    ownerName: 'Henri',
-    isShared: true,
-    days: [
-      {
-        id: 'd1',
-        date: '2024-05-01',
-        title: 'Premiere journee',
-        activities: [
-          { id: 'a1', title: 'Visite du temple Senso-ji' },
-          { id: 'a2', title: 'Diner a Shibuya' }
-        ]
-      }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Road trip Italie',
-    description: 'Florence, Rome, Naples',
-    ownerName: 'Claire',
-    isShared: false,
-    days: []
+async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-];
+
+  const res = await fetch(url, { ...options, headers });
+
+  // Auto-logout on 401 (expired token)
+  if (res.status === 401 && token) {
+    clearAuth();
+    window.location.href = '/login';
+  }
+
+  return res;
+}
+
+export async function login(email: string, password: string): Promise<{ token: string; user: { id: string; email: string; name: string; role: 'admin' | 'user' } }> {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ message: 'Erreur de connexion' }));
+    throw new Error(data.message || 'Erreur de connexion');
+  }
+
+  return res.json();
+}
 
 export async function fetchGuides(): Promise<Guide[]> {
-  if (USE_MOCK_DATA || !API_URL) {
-    await new Promise((r) => setTimeout(r, 500));
-    return mockGuides;
-  }
-
-  const res = await fetch(`${API_URL}/guides`, {
-    headers: { 'Content-Type': 'application/json' },
-    cache: 'no-store'
-  });
+  const res = await authFetch(`${API_URL}/guides`);
 
   if (!res.ok) {
     throw new Error('Erreur lors du chargement des guides');
@@ -51,27 +49,11 @@ export async function fetchGuides(): Promise<Guide[]> {
 }
 
 export async function fetchGuide(id: string): Promise<Guide> {
-  if (USE_MOCK_DATA || !API_URL) {
-    await new Promise((r) => setTimeout(r, 200));
-    const guide = mockGuides.find((g) => g.id === id);
-    if (!guide) {
-      throw new Error('Guide introuvable');
-    }
-    return guide;
-  }
-
-  const res = await fetch(`${API_URL}/guides/${id}`, {
-    headers: { 'Content-Type': 'application/json' },
-    cache: 'no-store'
-  });
+  const res = await authFetch(`${API_URL}/guides/${id}`);
 
   if (!res.ok) {
     throw new Error('Erreur lors du chargement du guide');
   }
 
   return res.json();
-}
-
-export function isMockModeEnabled(): boolean {
-  return USE_MOCK_DATA || !API_URL;
 }

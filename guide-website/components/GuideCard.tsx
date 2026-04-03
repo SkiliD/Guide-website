@@ -1,6 +1,7 @@
 // src/components/GuideCard.tsx
 import Link from 'next/link';
 import { Guide } from '@/lib/types';
+import { mobilityLabel, seasonLabel, audienceLabel } from '@/lib/labels';
 
 type Props = { guide: Guide };
 
@@ -18,12 +19,12 @@ export function GuideCard({ guide }: Props) {
       <div className="guide-card-body">
         <div className="mb-3 flex items-center justify-between gap-2">
           <span className="guide-card-pill guide-card-pill--id">
-            Guide #{guide.id}
+            Guide #{guide.id.slice(0, 6)}
           </span>
           {guide.isShared ? (
-            <span className="guide-card-pill guide-card-pill--shared">Partage</span>
+            <span className="guide-card-pill guide-card-pill--shared">Partagé</span>
           ) : (
-            <span className="guide-card-pill guide-card-pill--private">Prive</span>
+            <span className="guide-card-pill guide-card-pill--private">Privé</span>
           )}
         </div>
 
@@ -35,16 +36,29 @@ export function GuideCard({ guide }: Props) {
           {guide.description || 'Aucune description pour ce guide pour le moment.'}
         </p>
 
+        {/* Tags: mobility, season, audience */}
+        <div className="guide-tags">
+          {(Array.isArray(guide.mobility) ? guide.mobility : []).map(m => (
+            <span key={m} className="guide-tag guide-tag--mobility">{mobilityLabel(m)}</span>
+          ))}
+          {(Array.isArray(guide.season) ? guide.season : []).map(s => (
+            <span key={s} className="guide-tag guide-tag--season">{seasonLabel(s)}</span>
+          ))}
+          {(Array.isArray(guide.audience) ? guide.audience : []).map(a => (
+            <span key={a} className="guide-tag guide-tag--audience">{audienceLabel(a)}</span>
+          ))}
+        </div>
+
         <dl className="guide-stats">
           <div className="guide-stat guide-stat--days">
             <dt className="guide-stat-label">Jours</dt>
             <dd className="guide-stat-value">
-              {guide.days.length}
+              {guide.daysCount}
             </dd>
           </div>
 
           <div className="guide-stat guide-stat--activities">
-            <dt className="guide-stat-label">Activites</dt>
+            <dt className="guide-stat-label">Activités</dt>
             <dd className="guide-stat-value">
               {totalActivities}
             </dd>
@@ -54,8 +68,8 @@ export function GuideCard({ guide }: Props) {
         <div className="guide-meta">
           <span>
             {firstDate
-              ? `Debut: ${new Date(firstDate).toLocaleDateString('fr-FR')}`
-              : 'Date non definie'}
+              ? `Début : ${new Date(firstDate).toLocaleDateString('fr-FR')}`
+              : 'Date non définie'}
           </span>
           <span>{guide.ownerName || 'Auteur inconnu'}</span>
         </div>
