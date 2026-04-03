@@ -15,7 +15,7 @@ router.use(authenticateToken);
 router.get('/', async (req, res) => {
   const auth = req.authUser;
   if (!auth) {
-    return res.status(401).json({ message: 'Non authentifie' });
+    return res.status(401).json({ message: 'Non authentifié' });
   }
 
   const allGuides = await store.listGuides();
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
   const guideId = String(req.params.id);
   const auth = req.authUser;
   if (!auth) {
-    return res.status(401).json({ message: 'Non authentifie' });
+    return res.status(401).json({ message: 'Non authentifié' });
   }
 
   const guide = await store.findGuideById(guideId);
@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) => {
   }
 
   if (!store.canAccessGuide(guide, auth.userId, auth.role)) {
-    return res.status(403).json({ message: 'Acces interdit a ce guide' });
+    return res.status(403).json({ message: 'Accès interdit à ce guide' });
   }
 
   return res.json(await store.toFrontGuide(guide, auth.userId));
@@ -51,18 +51,18 @@ router.post('/', requireRole('admin'), async (req, res) => {
     title?: string;
     description?: string;
     daysCount?: number;
-    mobility?: Mobility;
-    season?: Season;
-    audience?: Audience;
+    mobility?: Mobility[];
+    season?: Season[];
+    audience?: Audience[];
   };
 
-  if (!title || !description || !daysCount || !mobility || !season || !audience) {
+  if (!title || !description || !daysCount || !mobility?.length || !season?.length || !audience?.length) {
     return res.status(400).json({
-      message: 'title, description, daysCount, mobility, season, audience sont obligatoires',
+      message: 'title, description, daysCount, mobility, season, audience sont obligatoires (mobility/season/audience doivent être des tableaux non vides)',
     });
   }
 
-  if (!mobilities.includes(mobility) || !seasons.includes(season) || !audiences.includes(audience)) {
+  if (!mobility.every(m => mobilities.includes(m)) || !season.every(s => seasons.includes(s)) || !audience.every(a => audiences.includes(a))) {
     return res.status(400).json({ message: 'Valeurs mobility/season/audience invalides' });
   }
 
@@ -78,18 +78,18 @@ router.put('/:id', requireRole('admin'), async (req, res) => {
     title?: string;
     description?: string;
     daysCount?: number;
-    mobility?: Mobility;
-    season?: Season;
-    audience?: Audience;
+    mobility?: Mobility[];
+    season?: Season[];
+    audience?: Audience[];
   };
 
-  if (mobility && !mobilities.includes(mobility)) {
+  if (mobility && !mobility.every(m => mobilities.includes(m))) {
     return res.status(400).json({ message: 'mobility invalide' });
   }
-  if (season && !seasons.includes(season)) {
+  if (season && !season.every(s => seasons.includes(s))) {
     return res.status(400).json({ message: 'season invalide' });
   }
-  if (audience && !audiences.includes(audience)) {
+  if (audience && !audience.every(a => audiences.includes(a))) {
     return res.status(400).json({ message: 'audience invalide' });
   }
 
@@ -208,7 +208,7 @@ router.put('/:id/activities/:activityId', requireRole('admin'), async (req, res)
   });
 
   if (!activity) {
-    return res.status(404).json({ message: 'Guide ou activite introuvable' });
+    return res.status(404).json({ message: 'Guide ou activité introuvable' });
   }
 
   return res.json(activity);
@@ -219,7 +219,7 @@ router.delete('/:id/activities/:activityId', requireRole('admin'), async (req, r
   const activityId = String(req.params.activityId);
   const deleted = await store.deleteActivity(guideId, activityId);
   if (!deleted) {
-    return res.status(404).json({ message: 'Guide ou activite introuvable' });
+    return res.status(404).json({ message: 'Guide ou activité introuvable' });
   }
   return res.status(204).send();
 });

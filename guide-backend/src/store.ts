@@ -14,9 +14,9 @@ export type CreateGuideInput = {
   title: string;
   description: string;
   daysCount: number;
-  mobility: Mobility;
-  season: Season;
-  audience: Audience;
+  mobility: Mobility[];
+  season: Season[];
+  audience: Audience[];
 };
 
 export type CreateActivityInput = {
@@ -458,6 +458,10 @@ class PgStore {
       id: guide.id,
       title: guide.title,
       description: guide.description,
+      mobility: guide.mobility,
+      season: guide.season,
+      audience: guide.audience,
+      daysCount: guide.daysCount,
       ownerName: owner?.name,
       isShared: guide.ownerId !== currentUserId,
       days: guide.days

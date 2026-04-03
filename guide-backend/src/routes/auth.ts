@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   const auth = req.authUser;
   if (!auth) {
-    return res.status(401).json({ message: 'Non authentifie' });
+    return res.status(401).json({ message: 'Non authentifié' });
   }
 
   const user = await store.findUserById(auth.userId);
@@ -72,7 +72,7 @@ router.post('/register', authenticateToken, requireRole('admin'), async (req, re
   }
 
   if (await store.findUserByEmail(email)) {
-    return res.status(409).json({ message: 'Email deja utilise' });
+    return res.status(409).json({ message: 'Email déjà utilisé' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

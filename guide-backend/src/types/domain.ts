@@ -50,9 +50,9 @@ export type GuideRecord = {
   title: string;
   description: string;
   daysCount: number;
-  mobility: Mobility;
-  season: Season;
-  audience: Audience;
+  mobility: Mobility[];
+  season: Season[];
+  audience: Audience[];
   ownerId: string;
   memberIds: string[];
   days: DayRecord[];
@@ -80,6 +80,10 @@ export type FrontGuide = {
   id: string;
   title: string;
   description?: string;
+  mobility: Mobility[];
+  season: Season[];
+  audience: Audience[];
+  daysCount: number;
   days: FrontDay[];
   ownerName?: string;
   isShared?: boolean;

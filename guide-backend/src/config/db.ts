@@ -27,9 +27,9 @@ export async function initDb(): Promise<void> {
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
         days_count INTEGER NOT NULL,
-        mobility VARCHAR(20) NOT NULL CHECK (mobility IN ('voiture', 'velo', 'a_pied', 'moto')),
-        season VARCHAR(20) NOT NULL CHECK (season IN ('ete', 'printemps', 'automne', 'hiver')),
-        audience VARCHAR(20) NOT NULL CHECK (audience IN ('famille', 'seul', 'groupe', 'entre_amis')),
+        mobility TEXT[] NOT NULL DEFAULT '{}',
+        season TEXT[] NOT NULL DEFAULT '{}',
+        audience TEXT[] NOT NULL DEFAULT '{}',
         owner_id UUID REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -101,7 +101,7 @@ async function seedDemoData(client: import('pg').PoolClient): Promise<void> {
   const guideResult = await client.query(
     `INSERT INTO guides (title, description, days_count, mobility, season, audience, owner_id)
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-    ['Voyage a Tokyo', 'Une semaine au Japon avec les incontournables', 2, 'a_pied', 'printemps', 'entre_amis', adminId]
+    ['Voyage à Tokyo', 'Une semaine au Japon avec les incontournables', 2, ['a_pied', 'velo'], ['printemps'], ['entre_amis', 'groupe'], adminId]
   );
   const guideId = guideResult.rows[0].id;
 
@@ -127,7 +127,7 @@ async function seedDemoData(client: import('pg').PoolClient): Promise<void> {
   const activityResult = await client.query(
     `INSERT INTO activities (guide_id, title, description, category, address, phone, opening_hours, website, start_time, end_time)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-    [guideId, 'Visite du temple Senso-ji', 'Decouverte du quartier et du temple historique', 'musee',
+    [guideId, 'Visite du temple Senso-ji', 'Découverte du quartier et du temple historique', 'musee',
      '2 Chome-3-1 Asakusa, Taito City, Tokyo', '+81-3-3842-0181', '06:00-17:00', 'https://www.senso-ji.jp/',
      '09:00', '11:00']
   );
